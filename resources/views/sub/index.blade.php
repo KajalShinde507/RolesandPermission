@@ -6,7 +6,8 @@
 
 <div class="row">
 <div class="col-sm-12">
-    <h1>Author</h1>    
+    <h1>Author</h1>  
+    <div class="table-responsive">  
  <table class="table table-striped">
     <thead>
         <tr>
@@ -48,6 +49,7 @@
     <a style="margin: 19px;" href="{{ route('sub.create')}}" class="btn btn-primary">New Authors</a>
     </div> 
     {{$author->links()}}
+    </div>
     </div>
     </div> 
 </div>

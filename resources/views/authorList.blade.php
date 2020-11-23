@@ -54,6 +54,7 @@
 
                     
                      </table>
+                     {{$authors->links()}}
                     </div>
                     </div>
 

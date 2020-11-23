@@ -48,12 +48,13 @@
                                </tr>
 
                                @endforeach
-
+                              
                              </tbody>
 
 
                     
                      </table>
+                     {{$books->links()}}
                     </div>
                     </div>
 

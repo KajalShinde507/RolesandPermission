@@ -36,7 +36,10 @@ Route::group(['middleware'=>['auth','admin']],function(){
 });
   
   Route::resource('main','BookController');
+  Route::post('fetch', 'BookController@fetch')->name('pagination.fetch');
+ 
   Route::resource('sub','AuthorController');
+  Route::post('fetch', 'AuthorController@fetch')->name('pagination.fetch');
  
   
 });

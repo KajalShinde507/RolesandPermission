@@ -39,19 +39,36 @@ class AuthorController extends Controller
           return redirect('home');*/
 
 
-          $authors= Author::all();
+          $authors= Author::paginate(2);
         
             return view('authorList',['authors'=> $authors]); 
     }
-    public function index()
+    /*public function index()
     {
 
         
 
 
-        $author= Author::all();
-
+       // $author= Author::all();
+       $author= Author::paginate(2);
         return view('sub.index', compact('author'));
+    }*/
+    function index()
+    {
+        $author= Author::paginate(2);
+     
+        return view('sub.pagination_parent', compact('author'));
+       // return view('sub.index', compact('author'));
+    }
+
+    function fetch(Request $request)
+    {
+     if($request->ajax())
+     {
+        $author= Author::paginate(2);
+      
+         return view('sub.index', compact('author'))->render();
+     }
     }
 
     /**

@@ -40,13 +40,16 @@
             </td>
         </tr>
         @endforeach
+       
     </tbody>
   </table>
-
+ 
 <div>
     <a style="margin: 19px;" href="{{ route('main.create')}}" class="btn btn-primary">New Books</a>
     </div> 
+   <div class=" text-center"> {{$book->links()}} </div>
     </div>
     </div> 
 </div>
+
 @endsection

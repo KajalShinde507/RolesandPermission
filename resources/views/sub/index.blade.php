@@ -40,12 +40,14 @@
             </td>
             </tr>
         @endforeach
+        
     </tbody>
   </table>
-
+ 
 <div>
     <a style="margin: 19px;" href="{{ route('sub.create')}}" class="btn btn-primary">New Authors</a>
     </div> 
+    {{$author->links()}}
     </div>
     </div> 
 </div>

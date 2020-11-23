@@ -38,7 +38,7 @@ class BookController extends Controller
         }
           return redirect('home');
         */
-        $books= Book::all();
+        $books= Book::paginate(2);
         return view('bookList',['books'=> $books]); 
 
 
@@ -47,11 +47,22 @@ class BookController extends Controller
    
     public function index()
     {
-        $book= Book::all();
-
-        return view('main.index', compact('book'));
+       // $book= Book::all();
+        $book= Book::paginate(2);
+        return view('main.pagination_parent', compact('book'));
+       // return view('main.index', compact('book'));
     }
+      
 
+    function fetch(Request $request)
+    {
+     if($request->ajax())
+     {
+        $book= Book::paginate(2);
+      
+         return view('main.index', compact('book'))->render();
+     }
+    }
     /**
      * Show the form for creating a new resource.
      *

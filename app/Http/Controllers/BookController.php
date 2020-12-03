@@ -7,9 +7,16 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationRequired;
 use App\Book;
 use User;
+use App\Mail\SendEmail;
+use App\Jobs\SendEmailJob;
+use Mail;
 use Illuminate\Support\Facades\Auth;
 use App\Author;
 use DB;
+use Excel;
+use App\Exports\BooksExport;
+use App\Imports\booksImport;
+
 
 class BookController extends Controller
 {
@@ -18,47 +25,139 @@ class BookController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+
+
+
     public function __construct()
     {
         $this->middleware('auth');
         $this->middleware('admin')->except('show1');
         
     }
+   
+    public function import(Request $request)
+    {
+      
+       
+    $this->validate($request,
+    [
+       'file'=> 'required|mimes:xls,xlsx,csv'
+    ]);
+
+       Excel::import(new booksImport,request()->file('file'));
+             return redirect()->back()->with('success',' import excel File Uploaded');
+}
+
+  
+
+
+   public function export(Request $request) 
+  {
+
+
+
+    if ($request->input('exportexcel') != null ){
+        return Excel::download(new BooksExport, 'Bookexport.xlsx');
+     }
+
+     if ($request->input('exportcsv') != null ){
+        return Excel::download(new BooksExport, 'Bookexport.csv');
+     }
+
+     return redirect()->back();
+   }
     
 
+   
 
-    public function show1()
+
+
+
+
+
+
+public function mailsent(Request $request)
     {
        
-        /*if(Auth::user()->isAdmin()==0)
-        {
-            $books= Book::all();
-           
-            return view('bookList',['books'=> $books]); 
+         $book= Book::select('bookname')            
+        ->orderBy('price', 'desc')   
+        ->take(5)                
+        ->get();
+        if(Auth::user()->isAdmin())
+            {
+            
+            SendEmailJob::dispatch($book);
+            
+            Mail::to($request->user())->send(new SendEmail($book));
+    
+            return response()->json(['success' => 'Your E-mail was sent! Allegedly.'], 200);
+    
         }
-          return redirect('home');
-        */
-        $books= Book::paginate(2);
-        return view('bookList',['books'=> $books]); 
 
 
-      
+       
     }
+    
+    public function sent(Request $request)
+    {   $book= Book::select('bookname')            
+        ->orderBy('price', 'desc')   
+        ->take(5)                
+        ->get();
+        return view('emails.test', compact('book'));
+        
+
+    }
+     public function sentpost(Request $request)
+     { 
+       
+        $book= Book::select('bookname')            
+        ->orderBy('price', 'desc')   
+        ->take(5)                
+        ->get();
+        $book->save();
+        Mail::to('kajalshinde507@gmail.com')->send(new SendEmail($book));
+       
+     }
+
+
+     public function show1()
+     {
+        
+         
+         $books= Book::paginate(4);
+         return view('bookList',['books'=> $books]); 
+ 
+ 
+       
+     }
+
+
+
+       
+    /*public function importExportView()
+      {
+        $book= Book::all();
+          return view('main.index',compact('book'));
+          
+      }
+   */
    
-    public function index()
+    
+    
+     function index()
     {
-       // $book= Book::all();
-        $book= Book::paginate(2);
+        $book= Book::paginate(4);
+     
         return view('main.pagination_parent', compact('book'));
-       // return view('main.index', compact('book'));
+       
     }
-      
 
     function fetch(Request $request)
     {
      if($request->ajax())
      {
-        $book= Book::paginate(2);
+        $book= Book::paginate(4);
       
          return view('main.index', compact('book'))->render();
      }

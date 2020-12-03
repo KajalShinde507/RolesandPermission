@@ -33,7 +33,7 @@ $(document).ready(function(){
  {
   var _token = $("input[name=_token]").val();
   $.ajax({
-      url:"{{ route('pagination.fetch') }}",
+      url:"{{ route('pagination.fetchbook') }}",
       method:"POST",
       data:{_token:_token, page:page},
       success:function(data)

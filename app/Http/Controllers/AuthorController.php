@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use App\Book;
 use App\Author;
 use User;
 use Illuminate\Support\Facades\Auth;
 use DB;
+use Excel;
+use App\Imports\AuthorsImport;
 
+use App\Exports\AuthorsExport;
 class AuthorController extends Controller
 {
     /**
@@ -26,33 +30,73 @@ class AuthorController extends Controller
     }
 
 
+    
 
-    public function show1()
+
+    public function importExportView()
     {
-       
-        /*if(Auth::user()->isAdmin()==0)
-        {
-            $authors= Author::all();
+        $author= Author::all();
+        return view('sub.index',compact('author'));
+    }
+ 
+ 
+  public function import(Request $request)
+  {
+    
+
+
+    $this->validate($request,
+   [
+   'file'=> 'required|mimes:xls,xlsx,csv'
+   ]);
+           
+   
+
+
+           Excel::import(new authorsImport,request()->file('file'));
+           return redirect()->back()->with('success',' Author excel File Imported');
+
+
+
+
         
-            return view('authorList',['authors'=> $authors]); 
-        }
-          return redirect('home');*/
+           }
+
+
+           public function export(Request $request) 
+           {
+         
+         
+         
+             if ($request->input('exportexcel') != null ){
+                 return Excel::download(new AuthorsExport, 'Authorexport.xlsx');
+              }
+         
+              if ($request->input('exportcsv') != null ){
+                 return Excel::download(new AuthorsExport, 'Authorexport.csv');
+              }
+         
+              return redirect()->back();
+            }
+
+
+
+
+
+
+
+    
+           public function show1()
+         {
+       
+       
 
 
           $authors= Author::paginate(2);
         
             return view('authorList',['authors'=> $authors]); 
-    }
-    /*public function index()
-    {
-
-        
-
-
-       // $author= Author::all();
-       $author= Author::paginate(2);
-        return view('sub.index', compact('author'));
-    }*/
+       }
+   
     function index()
     {
         $author= Author::paginate(2);

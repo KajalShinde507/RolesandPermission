@@ -14,4 +14,10 @@ class Author extends Model
     {
         return $this->belognsTo(Book::class,'author','id');
     }
+
+    /*public function books1()//oneauthor has many books
+    {
+       return $this->hasMany(Book::class,'author','id');
+    }*/
+    protected $hidden=['created_at','updated_at'];
 }

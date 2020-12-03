@@ -53,4 +53,71 @@
     </div>
     </div> 
 </div>
+
+
+
+<div class="container">
+
+    <div class="card bg-light mt-3">
+
+        <div class="card-header">
+
+             Import Export Excel 
+
+        </div>
+
+        <div class="card-body">
+
+        @if(count($errors) > 0)
+            
+            <div class="alert alert-Danger" role="alert">
+        
+        Upload Validation Error<br><br>
+            
+	
+            <ul>
+                @foreach($errors->all() as $error)
+	
+                <li>	{{ $error }}</li>
+	                   @endforeach
+    
+                   </ul> 
+                      </div>
+                        @endif
+
+
+           @if($message = Session::get('success'))
+ 
+         <div class="alert alert-success" role="alert">
+  
+            <strong>{{ $message }} </strong>
+
+       </div>
+         @endif
+
+            <form action="{{ url('/importauth') }}" method="POST" enctype="multipart/form-data">
+
+                @csrf
+
+                <input type="file" name="file" class="form-control">
+
+                <br>
+                
+
+
+                <button class="btn btn-success">Import Authors Data</button>
+
+                <!--<a class="btn btn-warning" href="{{ url('export') }}">Export User Data</a>-->
+
+            </form>
+            </form>
+            <form method="POST" action="{{ url('/exportauth') }}">
+               {{ csrf_field() }}
+               <input type="submit" name="exportexcel" value='Excel Export'>
+               <input type="submit" name="exportcsv" value='CSV Export'>
+              </form>
+
+        </div>
+
+    </div>
 @endsection

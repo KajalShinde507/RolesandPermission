@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationRequired;
 use App\Book;
-use User;
+use App\User;
 use App\Mail\SendEmail;
 use App\Jobs\SendEmailJob;
 use Mail;
@@ -14,72 +14,124 @@ use Illuminate\Support\Facades\Auth;
 use App\Author;
 use DB;
 use Excel;
+use App\favouritebook;
 use App\Exports\BooksExport;
 use App\Imports\booksImport;
-
+use App\Reports\MyReport;
+use App\Reports\bookselectReport;
+use App\Reports\selectbookbyauthor;
+use App\Reports\mostfavbookReport;
 
 class BookController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
-
-
-
-    public function __construct()
+   
+   public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('admin')->except('show1');
         
-    }
-   
-    public function import(Request $request)
-    {
-      
        
-    $this->validate($request,
-    [
+    }
+
+    public function bookreport()
+    {
+        abort_unless(\Gate::allows('isManager'), 403);
+        $report = new MyReport;
+        $report->run();
+        return view("Reports.bookreport",["report"=>$report]);
+    }
+
+
+
+    public function bookselectreport()
+    {
+        abort_unless(\Gate::allows('isManager'), 403);
+        $report = new bookselectReport;
+        $report->run();
+        return view("Reports.bookselectreport",["report"=>$report]);
+    }
+    public function selectbookbyauthor(Request $request)
+    {
+        abort_unless(\Gate::allows('isManager'), 403);
+        $report = new selectbookbyauthor;
+        $report->run();
+        return view("Reports.bookselectreport",["report"=>$report]);
+    }
+
+    public function bookbyauthorexport(Request $request)
+    {
+        abort_unless(\Gate::allows('isManager'), 403);
+        $report = new selectbookbyauthor;
+        $report->run();
+        $report->exportToExcel('selectbookbyauthorExcel')->toBrowser("selectbookbyauthor.xlsx");
+    }
+
+
+    public function bookkoolexport()
+    {
+        abort_unless(\Gate::allows('isManager'), 403);
+        $report = new MyReport;
+
+        $report->run();
+      $report->exportToExcel('MyReportExcel')->toBrowser("MyReport.xlsx");
+
+
+      
+     
+    }
+
+
+    public function favreport()
+    {
+        abort_unless(\Gate::allows('isManager'), 403);
+        $report = new mostfavbookReport;
+        $report->run();
+
+        return view("Reports.favreport",["report"=>$report]);
+
+
+    }
+    public function favkoolexport()
+    {
+        abort_unless(\Gate::allows('isManager'), 403);
+        $report = new mostfavbookReport;
+        $report->run();
+
+        $report->exportToExcel('mostfavbookReportExcel')->toBrowser("mostfavbookReport.xlsx");
+    }
+
+   public function import(Request $request)
+    {
+        abort_unless(\Gate::allows('isAdmin'), 403);
+       
+         $this->validate($request,
+      [
        'file'=> 'required|mimes:xls,xlsx,csv'
-    ]);
+       ]);
 
        Excel::import(new booksImport,request()->file('file'));
              return redirect()->back()->with('success',' import excel File Uploaded');
-}
+      }
 
   
 
 
    public function export(Request $request) 
   {
+    abort_unless(\Gate::allows('isAdmin'), 403);
+       if ($request->input('exportexcel') != null ){
+                  return Excel::download(new BooksExport, 'Bookexport.xlsx');
+       }
 
-
-
-    if ($request->input('exportexcel') != null ){
-        return Excel::download(new BooksExport, 'Bookexport.xlsx');
-     }
-
-     if ($request->input('exportcsv') != null ){
-        return Excel::download(new BooksExport, 'Bookexport.csv');
-     }
+             if ($request->input('exportcsv') != null ){
+                   return Excel::download(new BooksExport, 'Bookexport.csv');
+       }
 
      return redirect()->back();
    }
     
-
-   
-
-
-
-
-
-
-
 public function mailsent(Request $request)
     {
-       
+        abort_unless(\Gate::allows('isAdmin'), 403);
          $book= Book::select('bookname')            
         ->orderBy('price', 'desc')   
         ->take(5)                
@@ -91,7 +143,8 @@ public function mailsent(Request $request)
             
             Mail::to($request->user())->send(new SendEmail($book));
     
-            return response()->json(['success' => 'Your E-mail was sent! Allegedly.'], 200);
+        
+           return redirect()->back()->with('success',' mail sent successfully');
     
         }
 
@@ -99,100 +152,71 @@ public function mailsent(Request $request)
        
     }
     
-    public function sent(Request $request)
-    {   $book= Book::select('bookname')            
-        ->orderBy('price', 'desc')   
-        ->take(5)                
-        ->get();
-        return view('emails.test', compact('book'));
-        
-
-    }
+    
      public function sentpost(Request $request)
      { 
+        abort_unless(\Gate::allows('isAdmin'), 403);
        
         $book= Book::select('bookname')            
         ->orderBy('price', 'desc')   
         ->take(5)                
         ->get();
-        $book->save();
-        Mail::to('kajalshinde507@gmail.com')->send(new SendEmail($book));
+        $admins = User::where('role', 1)->get();
+        Mail::to($admins)->send(new SendEmail($book));
+
+        //Mail::to('kajalshinde507@gmail.com')->send(new SendEmail($book));
+        return redirect()->back()->with('success',' mail sent successfully');
        
      }
 
 
      public function show1()
      {
+        abort_unless(\Gate::allows('isAdmin'), 403);
         
-         
-         $books= Book::paginate(4);
+        $books= Book::get();
+    
          return view('bookList',['books'=> $books]); 
- 
- 
-       
-     }
-
-
-
-       
-    /*public function importExportView()
+       }
+     public function importExportView()
       {
+        abort_unless(\Gate::allows('isAdmin'), 403);
         $book= Book::all();
-          return view('main.index',compact('book'));
+          return view('main.import',compact('book'));
           
       }
-   */
+   
+      public function read()
+        {  
+        $data= Book::get();
+        return response()->json($data); 
+        }
+      public function index()
+     {
+     
+        return view('main.index');
+     
+      }
+
    
     
-    
-     function index()
-    {
-        $book= Book::paginate(4);
-     
-        return view('main.pagination_parent', compact('book'));
-       
-    }
-
-    function fetch(Request $request)
-    {
-     if($request->ajax())
-     {
-        $book= Book::paginate(4);
-      
-         return view('main.index', compact('book'))->render();
-     }
-    }
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
-    {
+    {  
+        abort_unless(\Gate::allows('isAdmin'), 403);
         return view('main.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+   
     public function store(Request $request)
      {
-
-        
-
+        abort_unless(\Gate::allows('isAdmin'), 403);
         $request->validate([
             
             'bookname'=>'required',
             'author'=>'required',
             'price'=>'required'
         ]);
-    
-        
-    
-        $book=new Book([
+      $book=new Book([
             'bookname' => $request->get('bookname'),
             'author' => $request->get('author'),
             'price' => $request->get('price'),
@@ -200,70 +224,41 @@ public function mailsent(Request $request)
         
         ]);
         $book->save();
-        //return redirect('/api/main');
         return redirect('main');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
+    
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+   
     public function edit($id)
-    {
+    {   abort_unless(\Gate::allows('isAdmin'), 403);
         $book = Book::find($id);
         return view('main.edit', compact('book'));   
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+  
     public function update(Request $request, $id)
-    {
-    
-        $request->validate([
+    {         abort_unless(\Gate::allows('isAdmin'), 403);
+        $validatedData = $request->validate([
             'bookname'=>'required',
             'author'=>'required',
             'price'=>'required'
         ]);
-
+        
         $book = Book::find($id);
         $book->bookname=  $request->get('bookname');
         $book->author = $request->get('author');
         $book->price = $request->get('price');
-        
         $book->save();
-
-        //return redirect('/api/main');
-        return redirect('main');
+        return redirect('/main');
+        
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    
+
+   public function destroy($id)
     {
 
-
+        abort_unless(\Gate::allows('isAdmin'), 403);
         $book = Book::find($id);
 
         if ($book)  {
@@ -271,12 +266,9 @@ public function mailsent(Request $request)
     
             DB::statement('ALTER TABLE books AUTO_INCREMENT = '.(count(BOOK::all())+1).';');
             }
-            
-    
-           // return redirect('/api/main')->with('$success', 'book deleted!');
-            return redirect('main');
+         return redirect('main');
         }
     }
-    
+
 }
 

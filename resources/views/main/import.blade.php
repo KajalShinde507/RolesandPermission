@@ -1,29 +1,38 @@
-<!DOCTYPE html>
+@extends('layouts.admin')
 
-<html>
-
-<head>
-
-    <title>Laravel </title>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css" />
-
-</head>
-
-<body>
+@section('content')
 
 
 
-<div class="container">
+ <!-- Content Wrapper. Contains page content -->
+  
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark">Books Information</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="main">Book data</a></li>
+              <li class="breadcrumb-item active"><a href="home">home</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
 
-    <div class="card bg-light mt-3">
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <!-- Small boxes (Stat box) -->
 
-        <div class="card-header">
 
-             Import Export Excel 
+        
 
-        </div>
-
+        
         <div class="card-body">
 
         @if(count($errors) > 0)
@@ -52,7 +61,7 @@
 
        </div>
          @endif
-
+          
             <form action="{{ url('/import') }}" method="POST" enctype="multipart/form-data">
 
                 @csrf
@@ -65,54 +74,39 @@
 
                 <button class="btn btn-success">Import Books Data</button>
 
-                <!--<a class="btn btn-warning" href="{{ url('export') }}">Export User Data</a>-->
+              <!--  <a class="btn btn-warning" href="{{ url('export') }}">Export User Data</a>-->
 
             </form>
+            <form method="POST" action="{{ url('/exportbook') }}">
+               {{ csrf_field() }}
+               <input type="submit" name="exportexcel" value='Excel Export'>
+               <input type="submit" name="exportcsv" value='CSV Export'>
+              </form> 
 
         </div>
 
     </div>
 
 </div>
-<div class="row">
-<div class="col-sm-12">
-    <h6> existing Books</h6>  
-    <div class="table-responsive">  
- <table class="table table-striped">
-    <thead>
-        <tr>
-          <td>ID</td>
-          <td>BookName</td>
-          <td>author_id</td>
-          
-          <td>price</td>
-          
-          
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($book as $value)
-       
-        
-        <tr>
-            <td>{{$value->id}}</td>
-            <td>{{$value->bookname}}</td>
-            <td>{{$value->author}}</td>
-            
-             <td>{{$value->price}}</td>
-             @endforeach
-       
-       </tbody>
-     </table>
-     </div>
-     </div>
-     </div>
+
+
+
+
+
+
     
-            
-</body>
-</html>
+</div>
+</section>
+@endsection
+<!-- /.card -->
 
+        <!-- right col -->
+        <!--</div>
+        </.row (main row) -->
+     <!-- </div><!- /.container-fluid -->
+    <!--</section>
+    <!- /.content -->
+  <!--</div>
+  <!- /.content-wrapper -->
 
-</body>
-
-</html>
+  

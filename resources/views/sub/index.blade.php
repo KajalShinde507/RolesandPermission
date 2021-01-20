@@ -1,123 +1,203 @@
-@extends('base1')
+@extends('layouts.admin')
 
-@section('sub')
-
-
-
-<div class="row">
-<div class="col-sm-12">
-    <h1>Author</h1>  
-    <div class="table-responsive">  
- <table class="table table-striped">
-    <thead>
-        <tr>
-          <td>ID</td>
-          <td>AthorName</td>
-          <td>Email</td>
-          
-          
-          
-        </tr>
-    </thead>
-    <tbody>
-        @foreach($author as $value)
-       
-        
-        <tr>
-            <td>{{$value->id}}</td>
-            <td>{{$value->authorname}}</td>
-            <td>{{$value->email}}</td>
-            
-
-            <td>
-                <a href="{{ route('sub.edit',$value->id)}}" class="btn btn-primary">Edit</a>
-            </td>
-            <td>
-                <form action="{{ route('sub.destroy', $value->id)}}" method="post">
-                  @csrf
-                  @method('DELETE')
-                  <button class="btn btn-danger" type="submit">Delete</button>
-                </form>
-            </td>
-            </tr>
-        @endforeach
-        
-    </tbody>
-  </table>
- 
-<div>
-    <a style="margin: 19px;" href="{{ route('sub.create')}}" class="btn btn-primary">New Authors</a>
-    </div> 
-    {{$author->links()}}
-    </div>
-    </div>
-    </div> 
-</div>
-
-
-
-<div class="container">
-
-    <div class="card bg-light mt-3">
-
-        <div class="card-header">
-
-             Import Export Excel 
-
-        </div>
-
-        <div class="card-body">
-
-        @if(count($errors) > 0)
-            
-            <div class="alert alert-Danger" role="alert">
-        
-        Upload Validation Error<br><br>
-            
-	
-            <ul>
-                @foreach($errors->all() as $error)
-	
-                <li>	{{ $error }}</li>
-	                   @endforeach
+@section('style')
+   <meta charset="utf-8"/>
+   
+   <meta name="csrf-token" content="{{ csrf_token() }}">
+   <meta name="_token" content="{{ csrf_token() }}">
+    <!--<base href="https://demos.telerik.com/kendo-ui/grid/index?autoRun=true&theme=silver">-->
+    <style>html { font-size: 14px; font-family: Arial, Helvetica, sans-serif; }</style>
     
-                   </ul> 
-                      </div>
-                        @endif
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2020.3.915/styles/kendo.common.min.css" />
+   <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2020.3.915/styles/kendo.silver.min.css" />
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2020.3.915/styles/kendo.silver.mobile.min.css" />
+    <!--<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2020.3.915/styles/kendo.default.min.css" />
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2020.3.915/styles/kendo.default.mobile.min.css" />-->
+@endsection
+
+@section('content')
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0 text-dark">Dashboard</h1>
+          </div><!-- /.col -->
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Dashboard v1</li>
+            </ol>
+          </div><!-- /.col -->
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+     
+     
+      
+    
+      <div id="example">
+      <div id="grid">
+      
+</div>
+@can('isAdmin')
+<div>
+<a style="margin: 19px;" href="{{ url('sub/create')}}" class="btn btn-primary">New Author</a>
+</div>
+@endcan
+
+</section>
+@section('javascript')
+      <script src="https://kendo.cdn.telerik.com/2020.3.915/js/jquery.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2020.3.915/js/kendo.all.min.js"></script> 
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+
+<script>
+      
 
 
-           @if($message = Session::get('success'))
- 
-         <div class="alert alert-success" role="alert">
-  
-            <strong>{{ $message }} </strong>
 
-       </div>
-         @endif
+        $(document).ready(function () {
+            
+                dataSource = new kendo.data.DataSource({
+                    autoSync: true,
+                    transport: {
+                        read:  {
+                            url: "http://localhost:8000/readauthor",
+                            dataType: "json"
+                        },
+                        update: {
+                           
+                            url:  "http://localhost:8000/main/update",
+                            dataType: "json",
+                            
+                            
+                        },
+                        destroy: {
+                            url: "http://localhost:8000/main/destroy",
+                            dataType: "json"
+                        },
+                        create: {
+                            url: "http://localhost:8000/main/create",
+                            dataType: "json"
+                        },
+                        parameterMap: function(options, operation) {
+                            if (operation !== "read" && options.models) {
+                                return {models: kendo.stringify(options.models)};
+                            }
+                        }
+                    },
+                   
+                    pageSize:4,
+                    schema: {
+                        
+                        model: {
+                            id: "id",
+                           fields: {
+                            id: { type: "number", editable: false, nullable: false },
+                                authorname: { validation: { required: true } },
+                                email: { validation: { required: true } },
+                                author: { validation: { required: true } }
+                               
+                                
+                            }
+                        }
+                    },
+                    
+                 
+                });
 
-            <form action="{{ url('/importauth') }}" method="POST" enctype="multipart/form-data">
+              
+              
+            $("#grid").kendoGrid({
+                dataSource: dataSource,
+                pageable: true,
+                navigatable: true,
+                height: 440,
+               
+                
+                columns: [
+                
+                   
+                 { field: "authorname", title: "Author Name", width: "200px" },
+                  { field: "email", title:"Email", width: "200px" },
 
-                @csrf
 
-                <input type="file" name="file" class="form-control">
-
-                <br>
+                 
+                  @can('isAdmin')
+                    {
+                      title: "Action",
+                      template: "<a href='{{ url('sub/#=id#/edit')}}'  class='btn btn-primary'>Edit</a>&nbsp;&nbsp;<a href='{{ url('sub/destroy/#=id#')}}'  <button class='btn btn-danger' type='submit'>Delete</button>"
+                   
+                         ,filterable: false,
+                         width: "200px" 
+                    },
+                    @endcan
+                    @can('isUser')
+                    {
+                     title: "Favourite/Unfavourite",
+                     
+                     template: "<button id='addfavourites' onClick='addToFavourites(author_id=#=id#, {{ Auth::user()->id }},this) '  class='addfavourite' >favourite</button>",
+                     width: "200px"
+                    }
+                  @endcan
+                  
+                   ],
                 
 
+                    
+                    });
+                      
+                  });
+function addToFavourites(bid, userid,obj) {
+      
+         var user_id = userid;
+          var author_id = bid;
+   
+            $.ajaxSetup({
+          headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+              }
+            });
+  
+           $.ajax({
+          type: 'post',
+      
+          url: '/addfavouritesauth',
+          data: {
+              'user_id': user_id,
+              'author_id': author_id,
+           
+          },
+        
+  
+          success:function( data ) {
+       
+       $(obj).text($(obj).text() == 'favourite' ? 'unfavourite': 'favourite');
+  
+      },
+          error: function (XMLHttpRequest) {
+              
+          }
+         
+         
+      });
+      
+     
+  }
 
-                <button class="btn btn-success">Import Authors Data</button>
-
-                <!--<a class="btn btn-warning" href="{{ url('export') }}">Export User Data</a>-->
-
-            </form>
-            </form>
-            <form method="POST" action="{{ url('/exportauth') }}">
-               {{ csrf_field() }}
-               <input type="submit" name="exportexcel" value='Excel Export'>
-               <input type="submit" name="exportcsv" value='CSV Export'>
-              </form>
-
-        </div>
-
-    </div>
+</script>
+</div>
 @endsection
+@endsection
+
+
+     
+
+
+

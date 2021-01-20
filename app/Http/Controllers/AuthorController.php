@@ -13,62 +13,73 @@ use Excel;
 use App\Imports\AuthorsImport;
 
 use App\Exports\AuthorsExport;
+use App\Reports\authorReport;
 class AuthorController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    
 
 
     public function __construct()
     {
-        $this->middleware('auth');
-        $this->middleware('admin')->except('show1');
-        
+       $this->middleware('auth');
+      
     }
 
-
+    public function authorreport()
+    { 
+        abort_unless(\Gate::allows('isManager'), 403);
+        $report = new authorReport;
+        $report->run();
+        return view("Reports.authorreport",["report"=>$report]);
+    }
     
+    public function authorkoolexport()
+    {
+        abort_unless(\Gate::allows('isManager'), 403);
+        $report = new authorReport;
 
+        $report->run();
+      $report->exportToExcel('authorReportExcel')->toBrowser("authorReport.xlsx");
+    }
+
+   
+
+
+
+    public function readauthor()
+    {  
+        
+        $book=Book::select('id','bookname','author','price')->get();
+          $data= author::get();
+         return response()->json($data); 
+       
+    }
 
     public function importExportView()
-    {
-        $author= Author::all();
-        return view('sub.index',compact('author'));
-    }
+      {
+        abort_unless(\Gate::allows('isAdmin'), 403);
+         $book= Book::all();
+          return view('sub.import',compact('book'));
+          
+      }
  
  
   public function import(Request $request)
   {
-    
-
-
+    abort_unless(\Gate::allows('isAdmin'), 403);
     $this->validate($request,
-   [
-   'file'=> 'required|mimes:xls,xlsx,csv'
-   ]);
-           
-   
-
-
+    [
+       'file'=> 'required|mimes:xls,xlsx,csv'
+       ]);
            Excel::import(new authorsImport,request()->file('file'));
            return redirect()->back()->with('success',' Author excel File Imported');
+  }
 
 
-
-
-        
-           }
-
-
-           public function export(Request $request) 
-           {
-         
-         
-         
-             if ($request->input('exportexcel') != null ){
+  public function export(Request $request) 
+    {
+        abort_unless(\Gate::allows('isAdmin'), 403);
+         if ($request->input('exportexcel') != null ){
                  return Excel::download(new AuthorsExport, 'Authorexport.xlsx');
               }
          
@@ -77,66 +88,34 @@ class AuthorController extends Controller
               }
          
               return redirect()->back();
-            }
-
-
-
-
-
-
+    }
 
     
-           public function show1()
-         {
-       
-       
-
-
-          $authors= Author::paginate(2);
-        
-            return view('authorList',['authors'=> $authors]); 
-       }
    
-    function index()
+     public function index()
     {
-        $author= Author::paginate(2);
-     
-        return view('sub.pagination_parent', compact('author'));
-       // return view('sub.index', compact('author'));
+        $author= Author::paginate(4);
+       return view('sub.index', compact('author'));
     }
 
-    function fetch(Request $request)
-    {
-     if($request->ajax())
-     {
-        $author= Author::paginate(2);
-      
-         return view('sub.index', compact('author'))->render();
-     }
-    }
+    
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    
     public function create()
     {
+        abort_unless(\Gate::allows('isAdmin'), 403);
         return view('sub.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    
     public function store(Request $request)
     {
+        abort_unless(\Gate::allows('isAdmin'), 403);
         $request->validate([
             
             'authorname'=>'required',
             'email'=>'required',
+            
             
         ]);
     
@@ -146,48 +125,28 @@ class AuthorController extends Controller
             'authorname' => $request->get('authorname'),
             'email' => $request->get('email'),
             
+            
         
         
         ]);
         $author->save();
-        //return redirect('/api/sub');
+        
         return redirect('sub');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    
     public function edit($id)
     {
+        abort_unless(\Gate::allows('isAdmin'), 403);
         $author = Author::find($id);
-        return view('sub.edit', compact('author'));   
+        return view('sub.edit', compact('author'));    
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+    
     public function update(Request $request, $id)
     {
+        abort_unless(\Gate::allows('isAdmin'), 403);
         $request->validate([
-            
             'authorname'=>'required',
             'email'=>'required',
             
@@ -200,18 +159,14 @@ class AuthorController extends Controller
         
         $author->save();
 
-        //return redirect('/api/sub');
+        
         return redirect('sub');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
+   
     public function destroy($id)
     {
+        abort_unless(\Gate::allows('isAdmin'), 403);
         $author = Author::find($id);
 
         if ($author)  {
@@ -219,9 +174,6 @@ class AuthorController extends Controller
     
             DB::statement('ALTER TABLE authors AUTO_INCREMENT = '.(count(Author::all())+1).';');
             }
-            
-    
-           // return redirect('/api/main')->with('$success', 'book deleted!');
             return redirect('sub');
         }
     }

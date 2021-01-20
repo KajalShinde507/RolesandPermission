@@ -18,12 +18,12 @@ class NonAdmin
      */
     public function handle($request, Closure $next)
     {
-        if(Auth::check() && Auth::user()->isAdmin()==0)
+        /*if(Auth::check() && Auth::user()->isAdmin()==0)
         {
             return $next($request); 
         
            //return redirect('admin');
-        }
+        }*/
 
 
 

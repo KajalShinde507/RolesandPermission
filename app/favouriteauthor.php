@@ -16,7 +16,15 @@ class favouriteauthor extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function author(){
-        return $this->belongsTo(Author::class);
+    public function authors(){
+        return $this->belongsTo(Author::class,'is_fav','author_id');
     }
+
+
+   /* protected $appends = ['is_fav'];
+
+    public function getIsFavAttribute(){
+        //return true;
+        return 1;
+    }*/
 }

@@ -9,14 +9,18 @@ use App\Book;
 use App\User;
 use App\Mail\SendEmail;
 use App\Jobs\SendEmailJob;
+use App\Jobs\Sale_rgJob;
 use Mail;
 use Illuminate\Support\Facades\Auth;
 use App\Author;
 use DB;
 use Excel;
+use Carbon\Carbon;
 use App\favouritebook;
 use App\Exports\BooksExport;
 use App\Imports\booksImport;
+use App\Imports\gstImport;
+use App\Imports\salergimport;
 use App\Reports\MyReport;
 use App\Reports\bookselectReport;
 use App\Reports\selectbookbyauthor;
@@ -31,6 +35,17 @@ class BookController extends Controller
         
        
     }
+
+
+    public function sample()
+    {
+        $value=config('status.activation_pending');
+        return response()->json($value); 
+        
+    }
+
+
+    
 
     public function bookreport()
     {
@@ -112,6 +127,73 @@ class BookController extends Controller
              return redirect()->back()->with('success',' import excel File Uploaded');
       }
 
+
+      public function importsale(Request $request)
+      {
+          abort_unless(\Gate::allows('isAdmin'), 403);
+         
+         
+         $this->validate($request,[
+            'import_file' => 'required|mimes:xls,xlsx,csv',
+        ]);
+  
+        Excel::import(new gstImport,request()->file('import_file'));
+         
+    
+              return response()->json(['message'=>'your file will process please wait']); 
+        }
+  
+
+      public function  importViewsalereport(Request $request)
+      {
+           abort_unless(\Gate::allows('isAdmin'), 403);
+             $this->validate($request,[
+            'import_file' => 'required|mimes:xls,xlsx,csv',
+             ]);
+             
+
+             $nowtime = Carbon::now()->format('Y-m-d H:i:s');
+           
+             //dd($nowtime);
+           if(request()->file('import_file')) {
+                $import = new salergimport( $nowtime);
+                $path = request()->file('import_file');
+                $filename=time().'.'.$path->getClientOriginalExtension();
+                $file  = $path->storeAs('Upload', $filename);
+                 //dd($file);
+                Sale_rgJob::dispatch($import, $file);
+        
+            }
+      
+        return response()->json(['message'=>'your file will process please wait']);
+        
+      
+     
+    }
+      
+      public function importExportViewsalereport()
+     {
+       abort_unless(\Gate::allows('isAdmin'), 403);
+        return view('main.saleimportreport');
+       
+         
+     }
+  
+      
+
+  public function importgst(Request $request)
+    {
+        abort_unless(\Gate::allows('isAdmin'), 403);
+       
+         $this->validate($request,
+      [
+       'file'=> 'required|mimes:xls,xlsx,csv'
+       ]);
+
+       Excel::import(new gstImport,request()->file('file'));
+             return redirect()->back()->with('success',' import excel File Uploaded');
+      }
+
   
 
 
@@ -185,10 +267,25 @@ public function mailsent(Request $request)
           return view('main.import',compact('book'));
           
       }
+      public function importExportViewsale()
+      {
+        abort_unless(\Gate::allows('isAdmin'), 403);
+        
+
+        return view('main.saleimport');
+        
+          
+      }
    
       public function read()
         {  
-        $data= Book::get();
+            if(Auth::user()->role =='3')
+            {
+                $data= Book::get();  
+            }
+        else{
+        $data= Book::withTrashed()->get();
+            }
         return response()->json($data); 
         }
       public function index()
@@ -269,6 +366,66 @@ public function mailsent(Request $request)
          return redirect('main');
         }
     }
+
+
+    public function softstore(Request $request)
+    {
+        abort_unless(\Gate::allows('isAdmin'), 403);
+       
+            
+            
+       
+    
+        
+        
+        
+            $id = $request['id'];
+       
+           
+
+
+        $favorite =Book::where('id', $id)
+        
+        ->first();
+        if(!$favorite ){
+
+
+        Book::where('id', $id)->restore();
+                
+            return response()->json(['message'=> "Recover Books Data"]); 
+            //Book::where('id', $id)
+
+           
+             
+        }
+        
+            else
+            {
+             
+                
+
+                $book = Book::find($id);
+
+                if ($book)  {
+                    if ($book->delete()){
+            
+                    DB::statement('ALTER TABLE books AUTO_INCREMENT = '.(count(BOOK::all())+1).';');
+                    }
+                }
+               // ->delete();
+                return response()->json(['message'=> "Deleted Books Data"]);
+               
+            }
+                //return response()->json($newfav); 
+        //return response()->json(['message'=>'successfully']); 
+       
+    
+
+    }
+
+
+
+
 
 }
 

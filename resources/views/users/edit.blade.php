@@ -33,21 +33,21 @@
       <h1>Update Users</h1>
 
         
-<form method="post" action="{{ route('users.update', $user->id) }}">
+<form method="post" action="{{ route('users.update', $user->id) }}" enctype="multipart/form-data">
     @method('PATCH') 
     @csrf
     <div class="form-group">
 
         <label for="name"> User Name:</label>
         <div class="col-md-6">
-        <input type="text"  class="form-control"  name="name" value={{ $user->name }} />
+        <input type="text"  class="form-control"  name="name" value={{ $user->name }} {{ $user->name ? 'readonly' : '' }} required=true />
     </div>
    </div>
      
     <div class="form-group">
         <label for="email">Email</label>
         <div class="col-md-6">
-        <input type="email" class="form-control"  name="email"   value={{ $user->email }}>
+        <input type="email" class="form-control"  name="email"   value={{ $user->email }}  {{ $user->email ? 'readonly' : '' }} required=true />
     </div>
     <div>
 
@@ -65,7 +65,51 @@
       </div>
       </div>
     
-           
+        
+
+        
+     <div class="form-group">
+                                <div class="col-md-12">
+                                    <label for="gender">{{ __('Gender *') }}</label>
+                            <div class="form-check form-check-inline" >
+                                <!--<input class="form-check-input" type="radio" name="gender"  value={{$user->gender}}  {{ $user->gender ? 'readonly' : '' }} required=true  autocomplete="gender">-->
+                                <input type="radio" name="gender" value="male" {{ $user->gender ? 'checked' : '' }}/>
+
+                                <label class="form-check-label" for="male">Male</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                
+                                <input type="radio" name="gender" value="female"   {{ $user->gender ? 'checked' : '' }}/>
+                                <label class="form-check-label" for="female">Female</label>
+                            </div>
+                                </div>
+
+                        </div>
+                                
+
+
+
+                  <div class="form-group ">
+                            <label for="dob">{{ __('Date OF Birth') }}</label>
+                            <div class="col-md-6">
+                      <input id="dob" type="date" class="form-control" name="dob" value={{ $user->dob}}   optional>
+                       
+                      </div>
+                      </div>
+                      
+
+                      <div class="form-group ">
+                        <label for="profile_picture" >{{ __('profile_picture') }}</label>
+
+                        <div class="col-md-6">
+                             <input type="file" class="form-control" name="profile_picture" id="profile_picture" optional>
+                        </div>
+                    </div>
+                     
+
+
+
+
     
 
     <div class="form-group pt-2">

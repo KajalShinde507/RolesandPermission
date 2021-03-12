@@ -14,7 +14,7 @@ class userReport extends \koolreport\KoolReport
     public function setup()
     {
         $this->src('mysql')
-        ->query("SELECT name,email FROM users")
+        ->query("SELECT name ,email , gender,DATE_FORMAT(dob,'%d-%b-%Y') AS DOB,case when user_status = 1 then 'active'  when user_status = 2 then 'Activation Pending' else  'Deactive' end user_status   FROM users")
         
         
         ->pipe($this->dataStore('users'));

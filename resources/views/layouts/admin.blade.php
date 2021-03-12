@@ -37,6 +37,7 @@
   
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
+<!--<body class="hold-transition sidebar-mini sidebar-collapse" style="height:100%;">-->
 <div class="wrapper">
 
   <!-- Navbar -->
@@ -163,7 +164,7 @@
   <!-- /.navbar -->
 
   <!-- Main Sidebar Container -->
-  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <aside class="main-sidebar sidebar-dark-primary elevation-4 ">
     <!-- Brand Logo -->
     <a href="index3.html" class="brand-link">
       <img src="{{asset('dist/img/AdminLTELogo.png')}}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
@@ -172,7 +173,7 @@
     </a>
 
     <!-- Sidebar -->
-    <div class="sidebar">
+    <div class="sidebar"  >
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
         <div class="image">
@@ -183,7 +184,10 @@
         
           <a id="navbarDropdown" class="nav-link " href="#" role="button"  aria-haspopup="true" aria-expanded="false" v-pre>
           <b>
-                login as</b><br> {{ Auth::user()->name}}               <span class="caret"></span>
+                Login</b>
+                <img src="/Uploads/{{Auth::user()->profile_picture }}" style=" height=30px; width=30px;  border-radius:50%"/>
+                        <br> {{ Auth::user()->name}}     <span class="caret"></span>
+
                         <br>{{Auth::user()->roles->name}}          <span class="caret"></span>
                         </a>
                        
@@ -219,8 +223,15 @@
                   <p>Import/Export Books</p>
                 </a>
               </li>
+            <!--  <li class="nav-item">
+                <a href="{{url('importsale')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Import/Export sale_rg</p>
+                </a>
+              </li>-->
               @endcan
-        
+             
+              
               @can('isAdmin')
            
           <li class="nav-item has-treeview">
@@ -289,6 +300,29 @@
            @endcan
 
       
+           @can('isAdmin')
+
+
+              <li class="nav-item has-treeview">
+            <a href="#" class="nav-link">
+              <i class="nav-icon  far fa-file-excel-o"></i>
+              <p>
+                Sale_Report
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{url('importsalereport')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Import salereport</p>
+                </a>
+              </li>
+              </ul>
+              </li>
+              @endcan
+
+
        @can('isManager')
          <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
@@ -329,18 +363,51 @@
                   <p>Users</p>
                 </a>
               </li>
+
+             <li class="nav-item">
+                <a href="{{url('salereportfilter')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>SaleReport</p>
+                </a>
+              </li>
+            
+
+         <!-- <li class="nav-item">
+                <a href="{{url('salergreport')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Sale_rg</p>
+                </a>
+              </li>
               </ul>
-          </li>
+          </li>-->
           @endcan
 
           @can('isUser')
           <li class="nav-item">
-                <a href="{{url('edituser')}}" class="nav-link">
+                <a href="{{url('updateuser')}}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>User Prfile Updation</p>
                 </a>
               </li>
          @endcan
+        <!-- @can('isUser')
+          <li class="nav-item">
+                <a href="{{url('favouritedbyuserbooks')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Books Favourited By User</p>
+                </a>
+              </li>
+         @endcan
+
+         @can('isUser')
+          <li class="nav-item">
+                <a href="{{url('favouritedbyuserauthors')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Author Favourited By User</p>
+                </a>
+              </li>
+         @endcan-->
+
 
             
           <li class="nav-header">Actions</li>

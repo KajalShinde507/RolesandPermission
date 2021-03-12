@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\favouritebook;
-
+use App\Book;
+use Auth;
+use DB;
 class FavoritebookController extends Controller
 {
     
@@ -29,16 +31,35 @@ class FavoritebookController extends Controller
     
         
         
-        $favorite= new favouritebook ([
-            'user_id' => $request->get('user_id'),
-            'book_id' => $request->get('book_id'),
+        
+            $book_id = $request['book_id'];
+       
+           
+
+
+        $favorite =favouritebook::where('book_id', $book_id)
+        ->where('user_id', Auth::user()->id)
+        ->first();
+        if(!$favorite ){
+            $newfav = new favouritebook;
+            $newfav->book_id =$book_id; 
+            $newfav->user_id = Auth::user()->id;
             
+            $newfav->save();
+            return response()->json(['message'=> "Successfully added to favourite list"]); 
+            //return response()->json($newfav); 
+             
+        }
         
-        
-        ]);
-        $favorite->save();
-        
-        return redirect()->back();
+            else
+            {
+            favouritebook::where('book_id', $book_id)
+        ->where('user_id', Auth::user()->id)
+        ->delete();
+        return response()->json(['message'=> "Successfully added to unfavourite list"]);
+        }
+        //return response()->json(['message'=>'successfully']); 
+       
     
 
     }
@@ -51,6 +72,26 @@ class FavoritebookController extends Controller
 
         return redirect()->back();
     }
-    
+    public function get()
+    {
+
+      /*  $query= favouritebook::where('user_id', Auth::user()->id) 
+    ->join('books', 'books.id', '=', 'favouritebooks.id')
+    ->select('books.bookname')->get();
+    //return response()->json($query); */
+    return view('favouritebooklist');  
+        // select books.bookname from books join favouritebooks on favouritebooks.book_id= books.id where user_id=3;
+    }
+
+
+
+    public function readfav()
+    {
+        $query= favouritebook::where('user_id', Auth::user()->id) 
+        ->join('books', 'books.id', '=', 'favouritebooks.book_id')
+        ->select('books.bookname')->get();
+        //return response()->json($query);
+        return view('favbooklistbyuser', compact('query'));   
+    }
 
 }

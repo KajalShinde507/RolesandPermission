@@ -60,6 +60,7 @@ class selectbookbyauthor extends \koolreport\KoolReport
         authors.author,
         books.author,
         books.price
+        
         FROM books
         JOIN authors
          ON
@@ -82,17 +83,7 @@ class selectbookbyauthor extends \koolreport\KoolReport
 
 
         $this->src("mysql")->query("
-        select
-        books.bookname,
-        authors.authorname,
-        
-        books.price
-        
-        from books
-        join authors
-         on
-        authors.author = books.author       
-   
+        select books.bookname, authors.authorname,books.price,case when books.deleted_at is null then 'active' else  'archive' end status from books join authors on authors.author = books.author; 
         
 
     

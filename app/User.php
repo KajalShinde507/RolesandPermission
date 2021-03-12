@@ -19,9 +19,8 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password' ,'role'
+        'name', 'email', 'password' ,'role','gender','user_status','profile_picture','dob',
     ];
-    //protected $appends = ['full_name'];
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -54,7 +53,10 @@ class User extends Authenticatable
         return $this->hasMany(favouritebook::class);
     }*/
 
-
+    public function verifyUser()
+       {
+      return $this->hasOne('App\VerifyUser');
+      }
     
      
 

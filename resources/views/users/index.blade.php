@@ -1,6 +1,9 @@
 @extends('layouts.admin')
 @section('style')
    <meta charset="utf-8"/>
+    
+   <meta name="csrf-token" content="{{ csrf_token() }}">
+   <meta name="_token" content="{{ csrf_token() }}">
     <!--<base href="https://demos.telerik.com/kendo-ui/grid/index?autoRun=true&theme=silver">-->
     <style>html { font-size: 14px; font-family: Arial, Helvetica, sans-serif; }</style>
     
@@ -38,7 +41,10 @@
       <div class="container-fluid">
         <!-- Small boxes (Stat box) -->
 
+
+        <div id="dialog"></div>
         <div id="example">
+       
       <div id="grid">
       
 </div>
@@ -75,7 +81,7 @@ $(document).ready(function () {
                     }
                 },
                
-                pageSize:4,
+                pageSize:6,
                 schema: {
                     
                     model: {
@@ -100,7 +106,7 @@ $(document).ready(function () {
             dataSource: dataSource,
             pageable: true,
             navigatable: true,
-            height: 440,
+            height: 380,
            
             
             columns: [
@@ -127,12 +133,20 @@ $(document).ready(function () {
 
                  {
                   title: "Action",
-                  template: "<a href='{{ url('users/#=id#/edit')}}'  class='btn btn-primary'>Edit</a>&nbsp;&nbsp;<a href='{{ url('users/destroy/#=id#')}}'  <button class='btn btn-danger' type='submit'>Delete</button>",
+                 // template: "<a href='{{ url('users/#=id#/edit')}}'  class='btn btn-primary'>Edit</a>&nbsp;&nbsp;<a href='{{ url('users/destroy/#=id#')}}'  <button class='btn btn-danger' type='submit'>Delete</button>",
+                  template: "#  if (user_status == '1' ) { #<a href='{{ url('users/#=id#/edit')}}'  class='btn btn-primary'>Edit</a>&nbsp;&nbsp<button  onClick='deactivates(#=id#,this) '  class='deactivate'>Deactivation</button>#}else if (user_status == '2'){ #<a href='{{ url('users/resend/#=id#')}}'  class='btn btn-success'>resend link</a> #}else{ #<a href='{{ url('reactive/#=id#')}}'  class='btn btn-info'>Reactivate</a>#} #",
                      filterable: false,
                      width: "200px"
+                },
+
+                {
+                  field:"user_staus",
+                title: "User_Status",
+                  
+                template: "#  if (user_status == '1' ) { #<center><span style='color:green;'>Active</span></center>#}else if (user_status == '2'){ # <center><span style='color:green;'>Activation Pending</a></center> #}else{ # <center><span style='color:green;'>Deactivate</span></center>#} #",
+                     width: "200px"
+                
                 }
-                
-                
               
               
                ],
@@ -140,6 +154,83 @@ $(document).ready(function () {
                 
       });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function deactivates(bid) {
+      
+      var id = bid;
+       
+       
+
+         $.ajaxSetup({
+       headers: {
+         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+           }
+         });
+
+        $.ajax({
+       type: 'post',
+   
+       url: '/deactivate',
+       data: {
+           'id': id
+           
+           
+        
+       },
+     
+
+       success:function(response) {
+         
+      
+    
+        $("#dialog").kendoWindow({
+    modal: true,
+    visible: false,
+    title: "Message"
+});
+
+setTimeout(function () {
+    var kendoWindow = $("#dialog").data("kendoWindow");
+    
+    kendoWindow.content(response.message);
+    
+    kendoWindow.center().open();
+}, 2000);
+
+$("#grid").data("kendoGrid").dataSource.read();
+     
+
+       },
+
+   
+       error: function (XMLHttpRequest) {
+           
+       }
+      
+      
+   
+   
+ 
+});
+
+
+}
+
+</script>
+</div>
 </script>
 </div>
 @endsection

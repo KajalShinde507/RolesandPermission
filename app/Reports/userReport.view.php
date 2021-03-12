@@ -33,6 +33,15 @@ use \koolreport\datagrid\DataTables;
                 "email"=>array(
                     "label"=>"Email ID"
                 ),
+                "DOB"=>array(
+                    "label"=>"DOB"
+                ),
+                "gender"=>array(
+                    "label"=>"Gender"
+                ),
+                "user_status"=>array(
+                    "label"=>"User_Status"
+                ),
                 
                 
         ),

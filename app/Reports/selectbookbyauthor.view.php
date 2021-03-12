@@ -89,6 +89,13 @@
                 
             ),
 
+            "status"=>array(
+                
+                "label"=>"Status",
+                
+            ),
+            
+
             
 
            

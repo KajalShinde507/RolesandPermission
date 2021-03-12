@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Book;
 use App\Author;
+use App\favouriteauthor;
 use User;
 use Illuminate\Support\Facades\Auth;
 use DB;
@@ -49,8 +50,14 @@ class AuthorController extends Controller
     public function readauthor()
     {  
         
-        $book=Book::select('id','bookname','author','price')->get();
-          $data= author::get();
+        if(Auth::user()->role =='3')
+        {
+            $data= Author::get();
+        }
+        else{
+         
+          $data= Author::withTrashed()->get();
+        }
          return response()->json($data); 
        
     }
@@ -177,4 +184,63 @@ class AuthorController extends Controller
             return redirect('sub');
         }
     }
+
+
+    public function softstore(Request $request)
+    {
+        abort_unless(\Gate::allows('isAdmin'), 403);
+       
+            
+       $id = $request['id'];
+       
+           
+
+
+        $favorite =Author::where('id', $id)
+        
+        ->first();
+        if(!$favorite ){
+
+
+        Author::where('id', $id)->restore();
+                
+            return response()->json(['message'=> "Recover Author Data"]); 
+            //Book::where('id', $id)
+
+           
+             
+        }
+        
+            else
+            {
+             
+                
+
+                $book = Author::find($id);
+
+                if ($book)  {
+                    if ($book->delete()){
+            
+                    DB::statement('ALTER TABLE authors AUTO_INCREMENT = '.(count(Author::all())+1).';');
+                    }
+                }
+               // ->delete();
+                return response()->json(['message'=> "Deleted Author Data"]);
+               
+            }
+                //return response()->json($newfav); 
+        //return response()->json(['message'=>'successfully']); 
+       
+    
+
+    }
+
+
+
+
+
+
+
+
+
 }

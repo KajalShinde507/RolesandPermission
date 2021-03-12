@@ -32,6 +32,12 @@ use \koolreport\datagrid\DataTables;
                 "book_written"=>array(
                     "label"=>"Book_Written By Author"
                 ),
+
+                "status"=>array(
+                
+                    "label"=>"Status",
+                    
+                ),
                
                 ),
 

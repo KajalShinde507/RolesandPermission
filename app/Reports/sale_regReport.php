@@ -203,7 +203,7 @@ class sale_regReport extends \koolreport\KoolReport
       $query_params[":category"] = $this->params["category"];
   }
  
-  $sql .= "AND final_outward_sales_reg.row_version = ( SELECT  MAX(aa.row_version) FROM final_outward_sales_reg aa  WHERE  final_outward_sales_reg.gstin_uin_of_supplier  = aa.gstin_uin_of_supplier  AND final_outward_sales_reg.fp = aa.fp AND final_outward_sales_reg.doc_type = aa.doc_type  AND final_outward_sales_reg.invoice_category = aa.invoice_category group by aa.invoice_no,aa.gstin_uin_of_supplier,aa.doc_type, aa.invoice_category having  final_outward_sales_reg.invoice_no = aa.invoice_no ) " ;
+  $sql .= "AND final_outward_sales_reg.row_version = ( SELECT  MAX(aa.row_version) FROM final_outward_sales_reg aa  WHERE  final_outward_sales_reg.gstin_uin_of_supplier  = aa.gstin_uin_of_supplier  AND final_outward_sales_reg.fp = aa.fp AND final_outward_sales_reg.doc_type = aa.doc_type  AND final_outward_sales_reg.invoice_category = aa.invoice_category group by aa.invoice_no,aa.gstin_uin_of_supplier,aa.doc_type,aa.gstin_of_customer, aa.invoice_category having  final_outward_sales_reg.invoice_no = aa.invoice_no AND final_outward_sales_reg.gstin_of_customer= aa.gstin_of_customer  ) " ;
   //dd($sql);
   $this->src("mysql")->query($sql)->params($query_params)->pipe(new ColumnRename(array(
      "gstin_uin_of_supplier"=>"GSTIN Of Supplier",
@@ -236,30 +236,7 @@ class sale_regReport extends \koolreport\KoolReport
 
  )))->pipe($this->dataStore("together"));
     
-   
-
-
-
-
-       }
-
-
-
-
-
-
-
-
-
-          
-
-       
-
-
-
-
-
-       
     }
+}
 }
   

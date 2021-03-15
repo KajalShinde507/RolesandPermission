@@ -33,17 +33,13 @@ class VerifyUserController extends Controller
 
         if (!empty($verifyUser))
         {
-          
-            $user=$verifyUser->user;
-          if ($user->user_status == 2 || $user->user_status == 3)
+           $user=$verifyUser->user;
+          if ($user->user_status == config('status.activation_pending') || $user->user_status == config('status.deactivate'))
                 {
-
-                    $data = config('status.active');
-
-                    $verifyUser
+                     $data = config('status.active');
+                     $verifyUser
                         ->user->user_status = $data;
-
-                    $verifyUser
+                        $verifyUser
                         ->user
                         ->update();
                     $status = "Your account is verified. You can now login.";
@@ -72,60 +68,40 @@ class VerifyUserController extends Controller
 
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    public function verifyAdmin(Request $request, $token)
+   public function verifyAdmin(Request $request, $token)
     {      
        
-
-        if (Auth::check())
-        {
+         if (Auth::check())
+          {
         
             return view('errors.403');
-        }
-     else{
-          $verifyUser = VerifyUser::where('token', $token)->first();
-
-       
-        if (!empty($verifyUser))
-        {
-            
-          $nowtime = Carbon::now();
-          $totalDuration = Carbon::createFromFormat('Y-m-d H:i:s', $verifyUser->created_at)
-              ->diffInDays($nowtime);
-  
-            $user = $verifyUser->user;
-            if ($totalDuration >=2)
+          }
+        else{
+                $verifyUser = VerifyUser::where('token', $token)->first();
+               if (!empty($verifyUser))
               {
-
-                 $verifyUser->delete();
-
-                 return redirect('/login')
-                 ->with('warning', "Sorry link is expire click on resend link.");
-                }
-          else
-            { 
-               if($user->role==1 || $user->role==2)
-                {
-                return view('changepassword', compact('verifyUser'));
-                }
-                else if($user->role==3)
-                {
-                    return view('emails.login', compact('verifyUser'));  
+                 $nowtime = Carbon::now();
+                 $totalDuration = Carbon::createFromFormat('Y-m-d H:i:s', $verifyUser->created_at)
+                 ->diffInDays($nowtime);
+                $user = $verifyUser->user;
+                 if ($totalDuration >=2)
+                  {
+                        $verifyUser->delete();
+                       return redirect('/login')
+                       ->with('warning', "Sorry link is expire click on resend link.");
+                  }
+                   else
+                  { 
+                     if($user->role==1 || $user->role==2)
+                        {
+                        return view('changepassword', compact('verifyUser'));
+                       }
+                      else if($user->role==3)
+                        {
+                        return view('emails.login', compact('verifyUser'));  
+                     }
                 }
             }
-        }
         else{
             return redirect('/login')
                  ->with('warning', "link not identified"); 
@@ -154,7 +130,7 @@ class VerifyUserController extends Controller
 
             $user = $verifyUser->user;
 
-            if ($user->user_status == 2 || $user->user_status == 3)
+            if ($user->user_status == config('status.activation_pending') || $user->user_status == config('status.deactivate'))
             {
 
                 $data = config('status.active');
@@ -200,7 +176,7 @@ class VerifyUserController extends Controller
         $user =  User::where('id',$id)->first(); 
          
            
-        if ($user->user_status == 1)
+        if ($user->user_status == config('status.active'))
         {
 
             $data = config('status.deactivate');
@@ -208,7 +184,7 @@ class VerifyUserController extends Controller
 
             $user->save();
         
-        \Mail::to($user->email)->send(new Deactive( $user));
+           \Mail::to($user->email)->send(new Deactive( $user));
         
         
 
@@ -216,11 +192,7 @@ class VerifyUserController extends Controller
 
         }
        
-      
-
-
-
-    }
+     }
 
 public function reactive($id)
 {
@@ -240,22 +212,22 @@ public function reactive($id)
       $role = User::where('id',$id)->first(['role']);
            $pass=md5( $useremail);
         
-             if($user->role=='1' || $user->role=='2'){
+           if($user->role== config('roles.Admin') || $user->role== config('roles.Report Manager')){
        
                   \Mail::to($useremail)->send(new VerifyAdminMail( $user,$pass));
-                  if($user->user_status==2 || $user->user_status==3){
-                  $value=config('status.activation_pending');
-                      $user->user_status=$value;
-                      $user->update();
+                  if ($user->user_status == config('status.activation_pending') || $user->user_status == config('status.deactivate')){
+                        $value=config('status.activation_pending');
+                         $user->user_status=$value;
+                         $user->update();
                   return redirect()->back()->with('success',' send activation mail to admin successfully');
              }
                 }
-            else if($user->role=='3'){
+            else if($user->role==config('roles.Front User')){
 
                \Mail::to($useremail)->send(new VerifyMail( $user));
 
 
-               if($user->user_status==2||$user->user_status==3){
+               if($user->user_status == config('status.activation_pending') || $user->user_status == config('status.deactivate')){
                 $value=config('status.activation_pending');
                     $user->user_status=$value;
                     $user->update();
@@ -276,7 +248,7 @@ return response()->json($sale);
 
 public function getReturnPeriod()
 {
-//$sale=DB::table('final_outward_sales_reg')->select('date_format('fp',"%M%Y")')->get();
+
 return response()->json($sale);
 }
 
@@ -294,18 +266,9 @@ public function selecttreadname(Request $request)
     $sta = $request->get('status');
     $cat = $request->get('category');
     $summa = $request->get('summary');
-   // $saledata=$request->all();
-   
-
-
     $report = new sale_regReport(array("gstin_uin_of_supplier"=>$treadname, "fp"=>$fpd,"doc_type"=>$doc, "salestatus"=>$sta,"category"=>$cat,"summary"=>$summa));
-    
-   
-    
-
     $data=$report->run()->exportToExcel('sale_regReportExcel')->saveAs("../storage/myreport.xlsx");
-   
-   $path = storage_path('myreport.xlsx');
+    $path = storage_path('myreport.xlsx');
    
     return response()->json($path);
   
@@ -319,8 +282,7 @@ public function downloadexcel()
     $headers = array(
               'Content-Type: application/xlsx',
             );
-
-    return Response::download($file, 'salereport.xlsx', $headers);
+   return Response::download($file, 'salereport.xlsx', $headers);
 }
 
 
@@ -329,8 +291,7 @@ public function selectsale(Request $request)
        
 
       
-    //$response = $request->all();
-     //return \Response::json($response);
+    
     $treadname = $request->get('gstin_uin_of_supplier');
     
     $fpd = $request->get('fp');
@@ -338,9 +299,7 @@ public function selectsale(Request $request)
     $sta = $request->get('status');
     $cat = $request->get('category');
     $summa = $request->get('summary');
-   
-    //dd($fpd,$doc,$sta,$cat,$summa);
-    $report = new sale_regReport(array("gstin_uin_of_supplier"=>$treadname, "fp"=>$fpd,"doc_type"=>$doc, "salestatus"=>$sta,"category"=>$cat,"summary"=>$summa));
+   $report = new sale_regReport(array("gstin_uin_of_supplier"=>$treadname, "fp"=>$fpd,"doc_type"=>$doc, "salestatus"=>$sta,"category"=>$cat,"summary"=>$summa));
     
     //dd($report->run()->render());
   return $report->run()->render();

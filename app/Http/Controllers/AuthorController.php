@@ -50,7 +50,7 @@ class AuthorController extends Controller
     public function readauthor()
     {  
         
-        if(Auth::user()->role =='3')
+        if(Auth::user()->role ==config('roles.Front User'))
         {
             $data= Author::get();
         }

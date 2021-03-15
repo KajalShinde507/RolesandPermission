@@ -27,25 +27,19 @@ class UserController extends Controller
         
        
     }
-
-
-
-
-
     public function salereport()
     {
         return view("Reports.salereport");
     }
 
-public function gstreport()
-{
+   public function gstreport()
+   {
     
         abort_unless(\Gate::allows('isManager'), 403);
         $report = new sale_regReport;
         $report->run();
         return view("Reports.gstreport",["report"=>$report]);
-    
-}
+    }
     public function userreport()
     {
         abort_unless(\Gate::allows('isManager'), 403);
@@ -56,35 +50,31 @@ public function gstreport()
     
    public function read()
    {  
-      abort_unless(\Gate::allows('isAdmin'), 403);
-       $data= User::where('id','<>',Auth::user()->role)
-        ->orWhere('role',2)
+         abort_unless(\Gate::allows('isAdmin'), 403);
+         $data= User::where('id','<>',Auth::user()->role)
+        ->orWhere('role',config('roles.Report Manager') )
         ->get();
-        
-        
-       return response()->json($data); 
+         return response()->json($data); 
     }
 
-      public function userkoolexport()
-      {
+    public function userkoolexport()
+    {
         abort_unless(\Gate::allows('isManager'), 403);
         $report = new userReport;
-
         $report->run();
-      $report->exportToExcel('userReportExcel')->toBrowser("userReport.xlsx");
+        $report->exportToExcel('userReportExcel')->toBrowser("userReport.xlsx");
 
       }
 
 
     public function index(Request $request)
     {  
-           abort_unless(\Gate::allows('isAdmin'), 403);
-        $user= User::where('role',1)
-              ->orWhere('role',2)
+             abort_unless(\Gate::allows('isAdmin'), 403);
+              $user= User::where('role',config('roles.Admin') )
+              ->orWhere('role',config('roles.Report Manager') )
               ->get();
              
-             
-        return view('users.index', compact('user'));
+         return view('users.index', compact('user'));
         
     }
 
@@ -93,7 +83,7 @@ public function gstreport()
     {  
         abort_unless(\Gate::allows('isAdmin'), 403);
          if($request->ajax()){
-        $roles = Role::where('id', $request->role_id)->first();
+         $roles = Role::where('id', $request->role_id)->first();
         
     }
 
@@ -117,10 +107,9 @@ public function gstreport()
     protected function store(Request $request)
     {
         abort_unless(\Gate::allows('isAdmin'), 403);
-
         $day=config('status.activation_link');
         $value=config('status.activation_pending');
-       $user= User::create([
+         $user= User::create([
             'name' => $request['name'],
             'email' => $request['email'],
                  
@@ -131,16 +120,16 @@ public function gstreport()
             'user_status'=> $value,
         ]);
 
-        if($user->role=='1' || $user->role=='2')
+        if($user->role== config('roles.Admin') || $user->role== config('roles.Report Manager'))
         {
-        $verifyUser = VerifyUser::create([
+            $verifyUser = VerifyUser::create([
             'user_id' => $user->id,
             'token' => sha1(time())
             
           ]);
           \Mail::to($user->email)->send(new VerifyAdminMail( $user,$pass,$day));
         }
-        else if ($user->role=='3'){
+        else if ($user->role==config('roles.Front User')){
 
             $verifyUser = VerifyUser::create([
                 'user_id' => $user->id,
@@ -152,10 +141,6 @@ public function gstreport()
           
 
         $user->save();
-
-    
-    
-        
       return redirect('users');
     }
    
@@ -169,10 +154,6 @@ public function gstreport()
         
         return view('userprofile')->with('user', Auth::user());
     }
-
-
-
-
 
     public function updateuser(Request $request, $id)
     {
@@ -191,51 +172,42 @@ public function gstreport()
             
         ]);
 
-       
-
-
-
-        $user = User::find($id);
-        $user->name=  $request->get('name');
-        $user->email = $request->get('email');
-        $user->password = Hash::make($request['password']);
-        $user->gender=$request->get('gender');
-        $user->dob=$request->get('dob');
+             $user = User::find($id);
+             $user->name=  $request->get('name');
+             $user->email = $request->get('email');
+             $user->password = Hash::make($request['password']);
+             $user->gender=$request->get('gender');
+             $user->dob=$request->get('dob');
          
         if($request->hasFile('profile_picture')){
 
-            $profile= request()->file('profile_picture');
-            $filename=time().'.'.$profile->getClientOriginalExtension();
-            $file_path=public_path('/Uploads/');
-            $profile->move($file_path,$filename);
-            $user->profile_picture=$filename;
-            
-             }
-
-        $user->save();
-        return redirect()->back()->with('success',' User profile Update successfully');
+                $profile= request()->file('profile_picture');
+                $filename=time().'.'.$profile->getClientOriginalExtension();
+                $file_path=public_path('/Uploads/');
+                $profile->move($file_path,$filename);
+                $user->profile_picture=$filename;
+            }
+          $user->save();
+          return redirect()->back()->with('success',' User profile Update successfully');
         
     }
-  public function edit($id)
-    {   abort_unless(\Gate::allows('isAdmin'), 403);
+      public function edit($id)
+      {  
+         abort_unless(\Gate::allows('isAdmin'), 403);
         $user = User::find($id);
         return view('users.edit', compact('user'));   
-    }
+      }
   
-
-    
     public function update(Request $request, $id)
     {
         abort_unless(\Gate::allows('isAdmin'), 403);
-
-        $request->validate([
+         $request->validate([
             'name'=>'required',
             'email'=>'required',
             'password'=>'required',
             'gender' => 'required',
-            
-            'dob' => 'sometimes',
-            'profile_picture' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg',
+             'dob' => 'sometimes',
+             'profile_picture' => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg',
            
             
         ]);
@@ -260,22 +232,17 @@ public function gstreport()
              }
 
         $user->save();
-        
-      
         return redirect('users');
      }
 
    
     public function destroy($id)
     {
-       
-        abort_unless(\Gate::allows('isAdmin'), 403);
+       abort_unless(\Gate::allows('isAdmin'), 403);
         $user = User::find($id);
-
         if ($user)  {
-            if ($user->delete()){
-    
-            DB::statement('ALTER TABLE users AUTO_INCREMENT = '.(count(User::all())+1).';');
+             if ($user->delete()){
+              DB::statement('ALTER TABLE users AUTO_INCREMENT = '.(count(User::all())+1).';');
             }
          return redirect('users');
         }
@@ -285,10 +252,9 @@ public function gstreport()
     public function resendlink(Request $request ,$id)
     {
         
-        $user=User::find($id);
-       $user_id=$id;
-       
-       $verifyUser = VerifyUser::create([
+         $user=User::find($id);
+         $user_id=$id;
+         $verifyUser = VerifyUser::create([
             'user_id' => $user_id,
             'token' => sha1(time())
             
@@ -297,31 +263,26 @@ public function gstreport()
           $role = User::where('id',$id)->first(['role']);
                $pass=md5( $useremail);
             
-                 if($user->role=='1' || $user->role=='2'){
+                 if($user->role== config('roles.Admin') || $user->role== config('roles.Report Manager')){
            
                       \Mail::to($useremail)->send(new VerifyAdminMail( $user,$pass));
-                      if($user->user_status==2 || $user->user_status==3){
-                      $value=config('status.activation_pending');
+                      if($user->user_status==config('status.activation_pending') || $user->user_status==config('status.deactivate')){
+                          $value=config('status.activation_pending');
                           $user->user_status=$value;
                           $user->update();
                       return redirect()->back()->with('success',' send activation mail to admin successfully');
                  }
                     }
-                else if($user->role=='3'){
+                else if($user->role==config('roles.Front User')){
 
                    \Mail::to($useremail)->send(new VerifyMail( $user));
-
-
-                   if($user->user_status==2||$user->user_status==3){
+                    if($user->user_status== config('status.activation_pending')||$user->user_status==config('status.deactivate')){
                     $value=config('status.activation_pending');
                         $user->user_status=$value;
                         $user->update();
                    return redirect()->back()->with('success',' send activation mail to user successfully'); 
                   }
                 }
-       
-        
-    
-    return redirect()->back();  
-  } 
+         return redirect()->back();  
+    } 
 }

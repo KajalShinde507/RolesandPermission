@@ -14,32 +14,16 @@ class FavouriteauthController extends Controller
         
       
     }
-
-
-
-
-
-   
-
-
     public function store(Request $request)
     {
         abort_unless(\Gate::allows('isUser'), 403);
-       $request->validate([
-            
+          $request->validate([
             'user_id'=>'required',
             'author_id'=>'required',
         ]);
     
-        
-        
-        
-            $author_id = $request['author_id'];
-       
-           
-
-
-        $favorite =favouriteauthor::where('author_id', $author_id)
+        $author_id = $request['author_id'];
+       $favorite =favouriteauthor::where('author_id', $author_id)
         ->where('user_id', Auth::user()->id)
         ->first();
         if(!$favorite ){
@@ -48,11 +32,10 @@ class FavouriteauthController extends Controller
             $newfav->user_id = Auth::user()->id;
             
             $newfav->save();
-             
-        }
+         }
         
-            else
-            {
+        else
+        {
             favouriteauthor::where('author_id', $author_id)
         ->where('user_id', Auth::user()->id)
         ->delete();
@@ -60,28 +43,14 @@ class FavouriteauthController extends Controller
         }
         return response()->json(['message'=>'successfully']); 
       
-    
-
     }
 
-
-
-
-
-
-
-
-    public function get()
+   public function get()
     {
-
-     
-    return view('favouriteauthorlist');  
+     return view('favouriteauthorlist');  
         
     }
-
-
-
-    public function readfav()
+  public function readfav()
     {
         $query= favouriteauthor::where('user_id', Auth::user()->id) 
         ->join('authors', 'authors.id', '=', 'favouriteauthors.author_id')

@@ -23,15 +23,11 @@ class Role
         
         
         return response()->view('errors.403');
-        /*if($permission !== null && !$request->user()->can($permission)) {
-            return response()->view('errors.403');
-        }*/
+        
 
     }
 
       
 
-      // return response()->view('errors.403');
-
-        // }
+     
 }

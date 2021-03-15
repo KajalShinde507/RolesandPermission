@@ -16,7 +16,7 @@ class FrontUser
     public function handle($request, Closure $next)
     {
 
-        if(Auth::check() && Auth::user()->role==3)
+        if(Auth::check() && Auth::user()->role==config('roles.Front User'))
         {
             return $next($request); 
         

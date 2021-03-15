@@ -119,11 +119,10 @@ class BookController extends Controller
         abort_unless(\Gate::allows('isAdmin'), 403);
        
          $this->validate($request,
-      [
-       'file'=> 'required|mimes:xls,xlsx,csv'
-       ]);
-
-       Excel::import(new booksImport,request()->file('file'));
+        [
+         'file'=> 'required|mimes:xls,xlsx,csv'
+        ]);
+            Excel::import(new booksImport,request()->file('file'));
              return redirect()->back()->with('success',' import excel File Uploaded');
       }
 
@@ -138,9 +137,7 @@ class BookController extends Controller
         ]);
   
         Excel::import(new gstImport,request()->file('import_file'));
-         
-    
-              return response()->json(['message'=>'your file will process please wait']); 
+         return response()->json(['message'=>'your file will process please wait']); 
         }
   
 
@@ -150,26 +147,20 @@ class BookController extends Controller
              $this->validate($request,[
             'import_file' => 'required|mimes:xls,xlsx,csv',
              ]);
-             
-
-             $nowtime = Carbon::now()->format('Y-m-d H:i:s');
+              $nowtime = Carbon::now()->format('Y-m-d H:i:s');
            
              //dd($nowtime);
-           if(request()->file('import_file')) {
+             if(request()->file('import_file')) {
                 $import = new salergimport( $nowtime);
                 $path = request()->file('import_file');
                 $filename=time().'.'.$path->getClientOriginalExtension();
                 $file  = $path->storeAs('Upload', $filename);
                  //dd($file);
                 Sale_rgJob::dispatch($import, $file);
+           }
+       return response()->json(['message'=>'your file will process please wait']);
         
-            }
-      
-        return response()->json(['message'=>'your file will process please wait']);
-        
-      
-     
-    }
+      }
       
       public function importExportViewsalereport()
      {
@@ -222,12 +213,8 @@ public function mailsent(Request $request)
             {
             
             SendEmailJob::dispatch($book);
-            
             Mail::to($request->user())->send(new SendEmail($book));
-    
-        
-           return redirect()->back()->with('success',' mail sent successfully');
-    
+            return redirect()->back()->with('success',' mail sent successfully');
         }
 
 
@@ -255,26 +242,20 @@ public function mailsent(Request $request)
      public function show1()
      {
         abort_unless(\Gate::allows('isAdmin'), 403);
-        
         $books= Book::get();
-    
-         return view('bookList',['books'=> $books]); 
+        return view('bookList',['books'=> $books]); 
        }
      public function importExportView()
       {
         abort_unless(\Gate::allows('isAdmin'), 403);
         $book= Book::all();
-          return view('main.import',compact('book'));
+        return view('main.import',compact('book'));
           
       }
       public function importExportViewsale()
       {
         abort_unless(\Gate::allows('isAdmin'), 403);
-        
-
         return view('main.saleimport');
-        
-          
       }
    
       public function read()
@@ -284,27 +265,21 @@ public function mailsent(Request $request)
                 $data= Book::get();  
             }
         else{
-        $data= Book::withTrashed()->get();
+                $data= Book::withTrashed()->get();
             }
         return response()->json($data); 
         }
       public function index()
-     {
-     
-        return view('main.index');
+      {
+       return view('main.index');
      
       }
-
-   
-    
-    public function create()
-    {  
+     public function create()
+     {  
         abort_unless(\Gate::allows('isAdmin'), 403);
         return view('main.create');
-    }
-
-   
-    public function store(Request $request)
+     }
+   public function store(Request $request)
      {
         abort_unless(\Gate::allows('isAdmin'), 403);
         $request->validate([
@@ -317,16 +292,11 @@ public function mailsent(Request $request)
             'bookname' => $request->get('bookname'),
             'author' => $request->get('author'),
             'price' => $request->get('price'),
-        
-        
-        ]);
+            ]);
         $book->save();
         return redirect('main');
     }
 
-    
-
-   
     public function edit($id)
     {   abort_unless(\Gate::allows('isAdmin'), 403);
         $book = Book::find($id);
@@ -335,7 +305,7 @@ public function mailsent(Request $request)
   
     public function update(Request $request, $id)
     {         abort_unless(\Gate::allows('isAdmin'), 403);
-        $validatedData = $request->validate([
+           $validatedData = $request->validate([
             'bookname'=>'required',
             'author'=>'required',
             'price'=>'required'
@@ -371,57 +341,29 @@ public function mailsent(Request $request)
     public function softstore(Request $request)
     {
         abort_unless(\Gate::allows('isAdmin'), 403);
-       
-            
-            
-       
-    
-        
-        
-        
-            $id = $request['id'];
-       
-           
-
-
+        $id = $request['id'];
         $favorite =Book::where('id', $id)
-        
         ->first();
         if(!$favorite ){
-
-
-        Book::where('id', $id)->restore();
-                
-            return response()->json(['message'=> "Recover Books Data"]); 
-            //Book::where('id', $id)
-
-           
-             
-        }
+           Book::where('id', $id)->restore();
+                return response()->json(['message'=> "Recover Books Data"]); 
+            }
         
-            else
+        else
             {
              
-                
-
                 $book = Book::find($id);
-
-                if ($book)  {
-                    if ($book->delete()){
-            
-                    DB::statement('ALTER TABLE books AUTO_INCREMENT = '.(count(BOOK::all())+1).';');
+                 if ($book)  {
+                     if ($book->delete()){
+                        DB::statement('ALTER TABLE books AUTO_INCREMENT = '.(count(BOOK::all())+1).';');
                     }
                 }
-               // ->delete();
+            
                 return response()->json(['message'=> "Deleted Books Data"]);
                
             }
-                //return response()->json($newfav); 
-        //return response()->json(['message'=>'successfully']); 
-       
-    
-
-    }
+            
+   }
 
 
 

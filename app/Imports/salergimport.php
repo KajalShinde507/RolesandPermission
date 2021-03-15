@@ -44,9 +44,9 @@ class salergimport implements ToModel, WithHeadingRow
             'ecom_gstin' => $row['ecom_gstin'],
             'customer_name' => $row['customer_name'],
             'invoice_no' => $row['invoice_no'],
-            //'invoice_date' => $row['6'],
+            
            'invoice_date' =>Date::excelToDateTimeObject((int)$row['invoice_date'])->format('d-m-Y'),
-           //'invoice_date' =>  \Carbon\Carbon::createFromFormat('d-m-Y', $row[6]),
+           
             'invoice_category' => $row['invoice_category'],
             'item_name' => $row['item_name'],
             'hsn_sac_code' => $row['hsn_sac_code'],
@@ -68,7 +68,7 @@ class salergimport implements ToModel, WithHeadingRow
             'nilrated_amt' => $row['nilrated_amt'],
             'exempted_amt' => $row['exempted_amt'],
             'non_gst_amt' => $row['non_gst_amt'],
-            'place_of_supply' => $row['place_of_supply'],//setColumnFormat(array( 'A' => '@' ))
+            'place_of_supply' => $row['place_of_supply'],
             'reverse_charge' => $row['reverse_charge'],
             'exp_Type' => $row['exp_type'],
             'port' => $row['port'],

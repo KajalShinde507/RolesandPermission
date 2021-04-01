@@ -24,7 +24,7 @@ Route::post('/deactivate', 'VerifyUserController@deactive');
 Route::get('reactive/{id}', 'VerifyUserController@reactive');
 Route::post('reactive/{id}', 'VerifyUserController@reactive');
 Route::post('userregistration', 'Auth\RegisterController@registerusers');
-
+Route::get('/returnperiods/user', 'VerifyUserController@getReturnPeriod');
 Route::get('/user/verifymail/{token}', 'VerifyUserController@verifyAdmin');
 Route::get('/user/verifyAdminmail/{token}', 'VerifyUserController@verifyAdmin');
 Route::post('/user/verifyAdminmail', 'VerifyUserController@changepassword');
